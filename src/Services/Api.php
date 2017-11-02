@@ -2,7 +2,8 @@
 
 namespace Maileva\Services;
 
-use Psr\Log\LoggerInterface;
+use Monolog\Logger;
+use Psr\Log\LogLevel;
 
 class Api {
     protected $application_name = '';
@@ -18,7 +19,7 @@ class Api {
     protected $weightConditions;
     protected $A4paperweight;
 
-    /** @var LoggerInterface */
+    /** @var Logger $logger */
     protected $logger = null;
 
     function __construct($application_name)
@@ -39,7 +40,7 @@ class Api {
         $this->packages_directory = $packages_directory;
     }
 
-    public function setLogger(LoggerInterface $logger){
+    public function setLogger(Logger $logger){
         $this->logger = $logger;
     }
 
@@ -71,7 +72,7 @@ class Api {
         $this->addNotifications($campaign);
 
         $command = new \Maileva\Ftp\Command($this->username, \Maileva\Ftp\Command::GATEWAY_PAPER);
-        $package = new \Maileva\Ftp\Package($command, $package_name, $this->packages_directory.$package_name, false, false, false, false);
+        $package = new \Maileva\Ftp\Package($command, $package_name, $this->packages_directory.$package_name, false, false, false);
 
         $data_log = array(
             'directory' => $this->packages_directory.$package_name,
@@ -82,13 +83,13 @@ class Api {
             $package->generate($campaign);
 
             $this->log(
-                Psr\Log\LogLevel::DEBUG,
+                LogLevel::DEBUG,
                 'Package generated',
                 $data_log
             );
-        }catch (Exception $e){
+        }catch (\Exception $e){
             $this->log(
-                Psr\Log\LogLevel::ERROR,
+                LogLevel::ERROR,
                 'Package not generated: '.$e->getMessage(),
                 $data_log
             );
@@ -135,13 +136,13 @@ class Api {
             $data_log['package_directory'] = $package->getPackageDirectory();
 
             $this->log(
-                Psr\Log\LogLevel::DEBUG,
+                LogLevel::DEBUG,
                 'Package pushed',
                 $data_log
             );
-        }catch (Exception $e){
+        }catch (\Exception $e){
             $this->log(
-                Psr\Log\LogLevel::ERROR,
+                LogLevel::ERROR,
                 'Package not pushed: '.$e->getMessage(),
                 $data_log
             );
@@ -162,19 +163,19 @@ class Api {
         );
         try{
             if(!\Maileva\Ftp\Package::pushExistingPackage($directory_name, $this->ftp_options['host'], $this->ftp_options['username'], $this->ftp_options['password'], $this->ftp_options['directory'])){
-                throw new Zend_Exception('Pushing to the ftp didn\'t work.');
+                throw new \Exception('Pushing to the ftp didn\'t work.');
             }
 
             $this->log(
-                Psr\Log\LogLevel::ERROR,
+                LogLevel::ERROR,
                 'Existing package pushed to the ftp',
                 $data_log
             );
 
             return true;
-        }catch (Exception $e){
+        }catch (\Exception $e){
             $this->log(
-                Psr\Log\LogLevel::ERROR,
+                LogLevel::ERROR,
                 'Package not pushed to the ftp: '.$e->getMessage(),
                 $data_log
             );
