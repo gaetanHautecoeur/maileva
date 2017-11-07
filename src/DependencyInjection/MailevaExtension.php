@@ -27,7 +27,7 @@ class MailevaExtension implements ExtensionInterface {
         // set connecteur xml
         $defApi->replaceArgument(0, $config['application_name']);
         $defApi->addMethodCall('configureXmlConnecteur', [
-            $config['user_connecteur_xml'], $config['password_connecteur_xml'], '', $config['package_directory']
+            $config['user_connecteur_xml'], $config['password_connecteur_xml'], $config['ftp'], $config['package_directory']
         ]);
 
         // set ratesInformations
@@ -37,7 +37,7 @@ class MailevaExtension implements ExtensionInterface {
             $config['A4paperweight']
         ]);
 
-        //$defApi->addMethodCall('setLogger', $container->getDefinition('logger'));
+        //$defApi->addMethodCall('setLogger', $container->getDefinition('monolog.processor.psr_log_message'));
     }
 
     public function getNamespace()
